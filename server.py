@@ -39,6 +39,15 @@ class TopHandler(RequestHandler):
 
 
 class ArticleHandler(RequestHandler):
+    def get(self, ref):
+        query = client.get_request({'text': 'story', 'indexes': 'swendex'}, HODApps.QUERY_TEXT_INDEX, async=False)[
+            'documents']
+        return_dict = {
+            "title": query[int(ref)]['title'],
+            "type": "story"
+        }
+        self.write(return_dict)
+
     def post(self):
         request_body = dict(tornado.escape.json_decode(self.request.body))
         url = request_body['url']
@@ -78,7 +87,7 @@ if __name__ == '__main__':
     app = tornado.web.Application(
         handlers=[
             (r"/top.json", TopHandler),
-            (r"/article", ArticleHandler)
+            (r"/article/([0-9]+)", ArticleHandler)
         ],
     )
     http_server = tornado.httpserver.HTTPServer(app, xheaders=True)
